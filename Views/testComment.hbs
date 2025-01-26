@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>testing comments</title>
+</head>
+<body>
+
+
+    <br>
+    <button class="btn btn-primary btn-sm" onclick="openComments()" id="openCommentBtn">Comments</button>
+    <div id="openComments" style="display: none;"> 
+
+
+
+         <div class="input-group mb-3 container" id="mainInput">
+        <input type="text" class="form-control" id="inputMessage" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" onclick="postMainComment()">Enter</button>
+        </div>
+        </div>
+
+    <div class="container">
+
+        <div style="border: solid black 1px; border-radius: 10px; padding-left: 5px;"><br>
+        <div id="messageContainer"></div>
+        <div><button onclick="loadComments()" class="btn btn-dark" style="padding:1px;">Load more </button></div><br>
+        
+        </div> 
+        
+        <br>
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+   
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+
+    <script>  
+            let count = 0;
+
+        const openComments = () =>{
+            if(document.getElementById("openComments").style.display === "none"){
+                document.getElementById("openComments").style.display = "block";
+                document.getElementById("openCommentBtn").innerText = "cancel";
+
+                count = 0;
+                loadComments();
+            }else{
+                document.getElementById("openCommentBtn").innerText = "comments";
+                document.getElementById("openComments").style.display = "none";
+                while(document.getElementById("messageContainer").firstChild){
+                    document.getElementById("messageContainer").removeChild(document.getElementById("messageContainer").firstChild);
+                }
+
+            }
+        }
+
+
+        const loadComments = () =>{
+        fetch(`/api/v1/auth/get-comment/${31}?loadCount=${count}`)
+        .then(res => res.json())
+        .then(res => {
+            console.log(res);
+            res.result.result.forEach(item =>{
+                
+                let cmtCount = item.sub_comment_count ? item.sub_comment_count : "";
+                
+                document.getElementById("messageContainer").innerHTML += 
+        `
+        <img src="${item.profilePicture}" alt="avatar" width="25"
+                  height="25" />
+        <small><span style="background-color: yellow;"><a href="/see-users/${item.id}">${item.message_by}</a></span> ${item.message_time}</small>
+           <p>${item.message}</p>
+            
+
+                <div>
+                <button type="button" id="downArrow${item.reply_id}" class="btn btn-light" style="padding:0px; display:flexbox;" onclick="openSubComments(${item.blog_id},${item.reply_id})">🔻<span class="badge badge-pill badge-secondary">${cmtCount}</span></button>
+                <button type="button" id="postmainsubcom${item.reply_id}" class="btn btn-light" style="padding:0px" onclick="postMainSubComment(${item.id},${item.blog_id},${item.reply_id})">Reply</button>
+                <div id="${item.reply_id}openMainSubInput" style="display:none;">
+                
+
+                     <div class="input-group mb-3 container">
+                    <input type="text" id="${item.reply_id}inputBar" class="form-control" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="${item.reply_id}sendMainSub">reply</button>
+                    </div>
+                    </div>
+
+
+
+                </div>
+                <div style="border: solid black 1px;padding: 5px;display:none;" id="${item.reply_id}subMsgOpen"><br>
+                <div id="${item.reply_id}mc">
+                
+                </div>
+                </div><hr>
+        `;
+
+        
+            });  
+
+            
+        })
+        .catch(err => console.error(err))
+        .finally(()=>{
+            count += 5;
+        })
+        }
+
+                        //    loadComments();
+
+
+        const postMainSubComment = (to_whom,blog_id,reply_id) =>{
+            //console.log(to_whom,blog_id,reply_id,"**** ** **");
+            if(document.getElementById(`${reply_id}openMainSubInput`).style.display === "none"){
+                document.getElementById(`${reply_id}openMainSubInput`).style.display = "flex";
+                document.getElementById(`postmainsubcom${reply_id}`).innerText = "cancel";
+                //reply_row_id,from_id,blog_id,reply_id
+                postSubComment(undefined,to_whom,blog_id,reply_id);
+            }else{
+                document.getElementById(`${reply_id}openMainSubInput`).style.display = "none";
+                document.getElementById(`postmainsubcom${reply_id}`).innerText = "Reply";
+            }
+        }
+
+
+       // loadComments();
+        const openSubComments = (blog_id,reply_id) =>{
+            //console.log("blog id ",blog_id,"reply_id",reply_id);
+            fetch(`/api/v1/auth/get-sub-comment/${blog_id}/${reply_id}`)
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+                //item.from_pic,item.from_username,item.message
+                if(!res.result.result.length) return;
+                if(document.getElementById(`${reply_id}subMsgOpen`).style.display === "none"){
+                    document.getElementById(`${reply_id}subMsgOpen`).style.display = "block";
+                    res.result.result.forEach(item =>{
+                    document.getElementById(`${reply_id}mc`).innerHTML += 
+                    `<img src="${item.from_pic}" alt="avatar" width="25"
+                    height="25" />
+                    <small><span style="background-color: yellow;"><a href="/see-users/${item.from_id}">${item.from_username}</a>
+                    </span> ->
+                    <img src="${item.to_pic}" alt="avatar" width="25"
+                    height="25" />
+                    <span style="background-color: yellow;">
+                    <a href="/see-users/${item.to_id}">${item.to_username}</a>
+                     </span> ${item.message_time}</small>
+                    <p>${item.message}
+                     <button class="btn btn-dark btn-sm" id="${item.reply_row_id}sub_reply" style="padding:0px" onclick="noReply(${item.reply_row_id},${item.from_id},${item.blog_id},${item.reply_id})">reply</button></p>
+                     
+                    <div class="input-group mb-3 container" id="${item.reply_row_id}sub_input" style="display:none;">
+                    <input type="text" id="${item.reply_row_id}post_sub_input" class="form-control" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="${item.reply_row_id}post_sub_button" type="button">Enter</button>
+                    </div>
+                    </div>
+                     <hr>
+                   
+                    `;
+
+                    })
+                }else{
+                    document.getElementById(`${reply_id}subMsgOpen`).style.display = "none";
+                    document.getElementById(`${reply_id}mc`).innerHTML = "";
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        
+        const noReply = (reply_row_id,from_id,blog_id,reply_id) =>{
+                //console.log(` reply row id: ${reply_row_id}, from id : ${from_id}, blog id: ${blog_id}, reply id : ${reply_id}`);
+                if(document.getElementById(`${reply_row_id}sub_input`).style.display === "none"){
+                    document.getElementById(`${reply_row_id}sub_input`).style.display = "flex";
+                    document.getElementById(`${reply_row_id}sub_reply`).innerText = "cancel";
+                    document.getElementById(`${reply_row_id}post_sub_input`).value = "";
+                    postSubComment(reply_row_id,from_id,blog_id,reply_id);
+                    //from_id,blog_id,reply_id,message
+
+                }else{
+                    document.getElementById(`${reply_row_id}sub_input`).style.display = "none";
+                    document.getElementById(`${reply_row_id}sub_reply`).innerText = "reply";
+
+                }
+        }
+
+        const postSubComment = (reply_row_id,from_id,blog_id,reply_id) =>{
+            console.log(reply_row_id,from_id,blog_id,reply_id,"*****");
+            let ipBar = "";
+            let sendBtn = "";
+
+            if(reply_row_id === undefined){
+                    ipBar = `${reply_id}inputBar`;
+                    sendBtn = `${reply_id}sendMainSub`;
+                }else{
+                    ipBar = `${reply_row_id}post_sub_input`;
+                    sendBtn = `${reply_row_id}post_sub_button`;
+                }
+            
+            document.getElementById(sendBtn).addEventListener
+            ("click",() => {
+                
+                let message = document.getElementById(ipBar).value;
+                if(!message.trim().length) return;
+                let obj = {
+                    to_id: from_id,
+                    blog_id,
+                    reply_id,
+                    message
+                };
+                console.log(obj.message);
+
+                fetch("/api/v1/auth/post-sub-comment",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify(obj)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if(res.message === `Your'e not logged in`){
+                        alert(`Your'e not logged in`);
+                    }
+                })
+                .catch(err => console.error(err))
+                .finally(()=>{
+                    openSubComments(blog_id,reply_id);
+                    if(document.getElementById(`${reply_id}inputBar`).value.length)
+                    document.getElementById(`${reply_id}inputBar`).value = "";
+                });
+            })
+        }
+
+        const postMainComment = () =>{
+            //{ blog_id, message }
+            
+            const message = document.getElementById("inputMessage").value;
+            if(!message.trim().length){
+                return;
+            }
+            fetch("/api/v1/auth/post-comment",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({ blog_id:31, message})
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.message === `Your'e not logged in`){
+                    alert(`Your'e not logged in`);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(()=>{
+                count = 0;
+                document.getElementById("inputMessage").value = "";
+                const toClear = document.getElementById("messageContainer");
+                toClear.innerHTML = "";
+                loadComments();
+            });
+
+        }
+
+
+    </script>
+</body>
+</html>

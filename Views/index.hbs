@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blogs</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        
+        .left-part {
+            background-color: #e9ecef; /* Light gray background for the left part */
+            padding: 20px;
+        }
+        .main-content {
+            background-color: #f8f9fa; /* Slightly lighter gray background for the main content */
+            padding: 20px;
+        }
+        .container {
+            padding-top: 20px; /* Add padding to the top of the container */
+            padding-bottom: 20px; /* Add padding to the bottom of the container */
+        }
+        .navbar {
+            margin-bottom: 20px; /* Add margin to the bottom of the navbar */
+        }
+
+        body {
+    margin: 0;
+    padding: 0;
+    
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.content {
+    padding: 20px;
+}
+
+</style>
+</head>
+<body class="content">
+
+    <div class="container">
+        <div class="row" >
+            <div class="col-12 col-md-3">
+                <div class="left-part">
+                    <!-- Left Part (25%) -->
+                    <h2>Profile</h2>
+                    <div class="card">
+                        <img src="" class="card-img-top" alt="..." id="imgsr">
+                        <div class="card-body">
+                            <h5 class="card-title" id="name">Card title</h5>
+                            <p class="card-text" id="bio">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" id="blogs" onclick="myPosts()" role="button">My posts</li>
+                            <li class="list-group-item"><a href="/update-profile" class="text-decoration-none text-body">Update profile</a>
+                            </li>
+                            <li class="list-group-item"><a href="/manage-friends" class="text-decoration-none text-body">Friends <span class="badge text-bg-secondary" id="penReq" style="background-color: yellow; display: inline;">New</span>
+                            </a></li>
+                        </ul>
+             <div class="card-body" id="logins">
+                {{!-- <a href="/main" class="card-link" onclick="logout()">logout</a> --}}
+                {{!-- <a href="/login" class="card-link" id="loginBtn">Login</a> --}}
+              </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="main-content">
+                    <!-- Main Content (75%) -->
+                    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                        <a class="navbar-brand" href="#">MyBlogs</a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav mr-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/create">Create</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/see-users">Add Friend</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/friends-blogs">Private Blog</a>
+                                </li>
+                                
+                            </ul>
+                            <form class="form-inline my-2 my-lg-0" id="searchForm"> 
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search username" aria-label="Search" id="searched">
+                                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="search">Search</button>
+                            </form>
+                        </div>
+                    </nav>
+                    <h1>Main Content</h1>
+                    <div id="blogsHere"></div>
+                    <div class="container">
+                         <button class="btn btn-primary" onclick="loadMore()">Load</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+
+    fetch("/get-pending-request-count")
+    .then(res => res.json())
+    .then(res => {
+        const {pending_req} = res.result[0];
+        if(pending_req > 0){
+            document.getElementById("penReq").style.display = "inline";
+        }else{
+            document.getElementById("penReq").style.display = "none";
+        }
+    })
+    .catch(err => console.error(err));
+
+
+    document.getElementById("searchForm").addEventListener("submit", e => {
+    
+        e.preventDefault();
+        let searched = document.getElementById("searched").value;
+        let url = `http://localhost:8000/search-user/${searched.trim()}`;
+
+        if(searched.trim().length){
+            window.open(url,'_blank');
+        }
+        /*
+        fetch(`/search-user/${searched}`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({searched})
+        })
+        .then(res => res.json())
+        .then(res => console.log(res))
+        .catch(err => console.error(err));
+        */
+
+    })
+
+    const myPosts = () =>{
+        console.log("this are my posts");
+        window.location.href = `http://localhost:8000/my-posts`;
+    }
+
+
+    const logout = () => {
+        fetch("/api/v1/auth/signout");
+    }
+
+    fetch("/user/profile")
+    .then(res => res.json())
+    .then(res => {
+       // name,bio,imgsr
+       const profile = res.result.profile;
+       //document.getElementById("blogs").innerText = `Blogs ${profile.blog_count}`;
+       //console.log(res);
+       if(profile.email){
+         document.getElementById("logins").innerHTML = 
+         `<a href="/main" class="card-link" onclick="logout()">logout</a>`;
+       }else{
+        //document.getElementById("loginBtn").style.display = "inline-block";
+        document.getElementById("logins").innerHTML = 
+        `<a href="/login" class="card-link" id="loginBtn">Login</a>`;
+       }
+       document.getElementById("name").innerText = profile.username;
+       document.getElementById("bio").innerText = profile.bio;
+       const img = profile.profilePicture ? profile.profilePicture : "Public/img/users/default.jpg";
+       document.getElementById("imgsr").src = img;
+    })
+    .catch(err => console.error(err));
+
+    let p = 0;
+    document.getElementById("blogsHere").innerHTML = "";
+    const loadMore = () =>{
+    fetch("/api/v1/get-blog",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({loadCount:p})
+    })
+    .then(res => res.json())
+    .then(res => {
+        console.log(res);
+        if(!res.result) return;
+        res.result.result.forEach(item =>{
+            const blog_head = item.blog_head ? item.blog_head : "🔥🔥🔥";
+            let commentID = item.blog_id+"newid";
+            /*777*/
+            document.getElementById("blogsHere").innerHTML += 
+               `<br><div class="card text-center">
+                <div class="card-header">
+                   <a href="/see-users/${item.bloogger_id}" style="text-decoration: none;"> ${item.blog_by} </a>
+                </div>
+                <div class="card-body"> 
+                    <h5 class="card-title">${blog_head}</h5>
+                    <p class="card-text">${item.blog}</p>
+                </div>
+                <div class="card-footer text-body-secondary">
+                <button class="btn btn-primary btn-sm" onclick="openComments(${item.blog_id},${item.comment_count})" id="${item.blog_id}openCommentBtn">Comments <span class="badge badge-light" id="${item.blog_id}spanCount">${item.comment_count}</span></button>
+                <button class="btn btn-primary btn-sm" onclick="giveLike(${item.blog_id})" id="${item.blog_id}givLikeBtn"><p id="${item.blog_id}likeBtn" style="display:inline">🤍</p> <span class="badge badge-light" id="${item.blog_id}likeCount">${item.likes}</span></button>
+                    ${item.created_time_ago}
+                   
+
+                </div>
+                
+                <div id="${item.blog_id}openComments" style="display: none; class="mb-0"> 
+
+
+
+         <div class="input-group mb-3 container" id="mainInput">
+        <input type="text" class="form-control" id="${item.blog_id}inputMessage" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" onclick="postMainComment(${item.blog_id},${item.comment_count})">Enter</button>
+        </div>
+        </div>
+
+    <div class="container" style="display:block;" id="${item.blog_id}messagesDiv">
+
+        <div style="border: solid black 1px; border-radius: 10px; padding-left: 5px;"><br>
+        <div id="${item.blog_id}messageContainer" style="text-align:left;"></div>
+        <div><button onclick="loadComments(${item.blog_id},${item.comment_count})" class="btn btn-dark" style="padding:1px;">Load more </button></div><br>
+        
+        </div> 
+        
+        <br>
+
+    </div>
+
+                
+`
+        })
+    })
+    .catch(err => console.error(err))
+    .finally(()=>{
+        p = p + 7;
+        likeStatus();
+    })
+
+
+
+    }
+ loadMore();
+
+ const likeStatus = () =>{
+ fetch(`/api/v1/auth/blogs-like-status`)
+ .then(res => res.json())
+ .then(res => {
+    //console.log(res,"********");
+    res.result.forEach(item =>{
+        
+       // console.log(item.liked,item.blog_id);
+       let status = "🤍";
+       //console.log(item.liked);
+        if(item.liked && item.liked === "1"){
+            status = "🩷"
+            
+        }
+            //console.log(status);
+        if(document.getElementById(`${item.blog_id}likeBtn`) !== null){
+            document.getElementById(`${item.blog_id}likeBtn`).innerText = status;
+        }
+        
+    })
+ })
+ .catch(err => console.error(err));
+ }
+ likeStatus();
+
+ const giveLike = (blog_id) =>{
+    document.getElementById(`${blog_id}givLikeBtn`).disabled = true;
+    fetch("/api/v1/auth/post-like",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({blog_id})
+    })
+    .then(res => res.json())
+    .then(res => {
+        //console.log(res.message);
+        if(res.message === `Your'e not logged in!!`){
+            alert(`Your'e not logged in!!`);
+        }
+    })
+    .catch(err => {
+        //console.error(err);
+    })
+    .finally(()=>{
+                document.getElementById(`${blog_id}givLikeBtn`).disabled = false;
+
+        getIndividualLike(blog_id);
+    })
+ }
+
+
+      const getIndividualLike = (blog_id) => {
+        fetch(`/api/v1/auth/get-blog-like-count/${blog_id}`)
+    .then(res => res.json())
+    .then(res => {
+        //🤍🩷
+        //console.log(res.result[0].likes);
+        document.getElementById(`${blog_id}likeCount`).innerText = res.result[0].likes;
+        //document.getElementById(`${blog_id}likeCount`).innerText = res.result[0].likes;
+        if(document.getElementById(`${blog_id}likeBtn`).innerText === "🤍"){
+            document.getElementById(`${blog_id}likeBtn`).innerText = "🩷";
+        }else{
+            document.getElementById(`${blog_id}likeBtn`).innerText = "🤍";
+        }
+    })
+    .catch(err => console.error(err))
+    .finally(()=>{
+                //document.getElementById(`${blog_id}givLikeBtn`).disabled = false;
+
+    });
+      }
+
+  //  document.getElementById("getMessagesId").innerHTML = "";
+        let count = 0;
+      const openComments = (blog_id,comment_count) =>{
+            fetch(`/api/v1/auth/get-comment-count/${blog_id}`)
+            .then(res => res.json())
+            .then(res =>{
+                console.log(res.result[0].comment_count);
+
+                if(document.getElementById(`${blog_id}openComments`).style.display === "none"){
+                    if(!res.result[0].comment_count){
+                        document.getElementById(`${blog_id}messagesDiv`).style.display = "none"; 
+                        //openSubComments(blog_id,reply_id);
+                    }else{
+                        document.getElementById(`${blog_id}messagesDiv`).style.display = "block"; 
+                        //openSubComments(blog_id,reply_id);
+
+                    }
+                document.getElementById(`${blog_id}openComments`).style.display = "block";
+                document.getElementById(`${blog_id}openCommentBtn`).innerHTML
+                 = `Cancel`;
+                //document.getElementById(`${blog_id}openCommentBtn`).innerHTML
+                // = `Cancel <span class="badge badge-light" id="${blog_id}spanCount">${res.result[0].comment_count}</span>`;
+                count = 0;
+                loadComments(blog_id,res.result[0].comment_count);
+            }else{
+                document.getElementById(`${blog_id}openCommentBtn`).innerHTML
+                 = `Comments <span class="badge badge-light" id="${blog_id}spanCount">${res.result[0].comment_count}</span>`;
+                document.getElementById(`${blog_id}openComments`).style.display = "none";
+                while(document.getElementById(`${blog_id}messageContainer`).firstChild){
+                    document.getElementById(`${blog_id}messageContainer`).removeChild(document.getElementById(`${blog_id}messageContainer`).firstChild);
+                }
+
+            }
+
+
+
+            })
+            .catch(err => console.error(err));
+
+            
+        }
+
+
+         const loadComments = (blog_id,comment_count) =>{
+        fetch(`/api/v1/auth/get-comment/${blog_id}?loadCount=${count}`)
+        .then(res => res.json())
+        .then(res => {
+            res.result.result.forEach(item =>{
+                
+                let cmtCount = item.sub_comment_count ? item.sub_comment_count : "";
+                
+                document.getElementById(`${blog_id}messageContainer`).innerHTML += 
+        `
+        <img src="${item.profilePicture}" alt="avatar" width="25"
+                  height="25" />
+        <small><span style="background-color: yellow;"><a href="/see-users/${item.id}">${item.message_by}</a></span> ${item.message_time}</small>
+           <p>${item.message}</p>
+            
+
+                <div>
+                <button type="button" id="downArrow${item.reply_id}${item.blog_id}" class="btn btn-light" style="padding:0px; display:flexbox;" onclick="openSubComments(${item.blog_id},${item.reply_id})">🔻<span class="badge badge-pill badge-secondary">${cmtCount}</span></button>
+                <button type="button" id="postmainsubcom${item.reply_id}${item.blog_id}" class="btn btn-light" style="padding:0px" onclick="postMainSubComment(${item.id},${item.blog_id},${item.reply_id})">Reply</button>
+                <div id="${item.reply_id}${item.blog_id}openMainSubInput" style="display:none;">
+                
+
+                     <div class="input-group mb-3 container">
+                    <input type="text" id="${item.reply_id}${item.blog_id}inputBar" class="form-control" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="${item.reply_id}${item.blog_id}sendMainSub">reply</button>
+                    </div>
+                    </div>
+
+
+
+                </div >
+                <div style="border: solid black 1px;padding: 5px;display:none;" id="${item.reply_id}${item.blog_id}subMsgOpen"><br>
+                <div id="${item.reply_id}${item.blog_id}mc">
+                
+                </div>
+                </div><hr>
+        `;
+            });  
+
+            
+        })
+        .catch(err => console.error(err))
+        .finally(()=>{
+            count += 5;
+        })
+        }
+
+
+
+         const openSubComments = (blog_id,reply_id) =>{
+            //console.log("blog id ",blog_id,"reply_id",reply_id);
+            fetch(`/api/v1/auth/get-sub-comment/${blog_id}/${reply_id}`)
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+                //item.from_pic,item.from_username,item.message
+                if(!res.result.result.length) return;
+                if(document.getElementById(`${reply_id}${blog_id}subMsgOpen`).style.display === "none"){
+                    document.getElementById(`${reply_id}${blog_id}subMsgOpen`).style.display = "block";
+                    res.result.result.forEach(item =>{
+                    document.getElementById(`${reply_id}${blog_id}mc`).innerHTML += 
+                    `<img src="${item.from_pic}" alt="avatar" width="25"
+                    height="25" />
+                    <small><span style="background-color: yellow;"><a href="/see-users/${item.from_id}">${item.from_username}</a>
+                    </span> ->
+                    <img src="${item.to_pic}" alt="avatar" width="25"
+                    height="25" />
+                    <span style="background-color: yellow;">
+                    <a href="/see-users/${item.to_id}">${item.to_username}</a>
+                     </span> ${item.message_time}</small>
+                    <p>${item.message}
+                     <button class="btn btn-dark btn-sm" id="${item.reply_row_id}${blog_id}sub_reply" style="padding:0px" onclick="noReply(${item.reply_row_id},${item.from_id},${item.blog_id},${item.reply_id})">reply</button></p>
+                     
+                    <div class="input-group mb-3 container" id="${item.reply_row_id}${blog_id}sub_input" style="display:none;">
+                    <input type="text" id="${item.reply_row_id}${blog_id}post_sub_input" class="form-control" placeholder="Message" aria-label="Message" aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="${item.reply_row_id}${blog_id}post_sub_button" type="button">Enter</button>
+                    </div>
+                    </div>
+
+
+                     <hr>
+                   
+                    `;
+
+                    })
+                }else{
+                    document.getElementById(`${reply_id}${blog_id}subMsgOpen`).style.display = "none";
+                    document.getElementById(`${reply_id}${blog_id}mc`).innerHTML = "";
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+
+        const noReply = (reply_row_id,from_id,blog_id,reply_id) =>{
+                //console.log(` reply row id: ${reply_row_id}, from id : ${from_id}, blog id: ${blog_id}, reply id : ${reply_id}`);
+                if(document.getElementById(`${reply_row_id}${blog_id}sub_input`).style.display === "none"){
+                    document.getElementById(`${reply_row_id}${blog_id}sub_input`).style.display = "flex";
+                    document.getElementById(`${reply_row_id}${blog_id}sub_reply`).innerText = "cancel";
+                    document.getElementById(`${reply_row_id}${blog_id}post_sub_input`).value = "";
+                    postSubComment(reply_row_id,from_id,blog_id,reply_id);
+                    //from_id,blog_id,reply_id,message
+
+                }else{
+                    document.getElementById(`${reply_row_id}${blog_id}sub_input`).style.display = "none";
+                    document.getElementById(`${reply_row_id}${blog_id}sub_reply`).innerText = "reply";
+
+                }
+        }
+
+
+         const postMainSubComment = (to_whom,blog_id,reply_id) =>{
+            console.log(to_whom,blog_id,reply_id,"**** ** **");
+            
+            if(document.getElementById(`${reply_id}${blog_id}openMainSubInput`).style.display === "none"){
+                document.getElementById(`${reply_id}${blog_id}openMainSubInput`).style.display = "flex";
+                document.getElementById(`postmainsubcom${reply_id}${blog_id}`).innerText = "cancel";
+                //reply_row_id,from_id,blog_id,reply_id
+                postSubComment(undefined,to_whom,blog_id,reply_id);
+            }else{
+                document.getElementById(`${reply_id}${blog_id}openMainSubInput`).style.display = "none";
+                document.getElementById(`postmainsubcom${reply_id}${blog_id}`).innerText = "Reply";
+            }
+        }
+
+
+
+        const postSubComment = (reply_row_id,from_id,blog_id,reply_id) =>{
+            console.log(reply_row_id,from_id,blog_id,reply_id,"*****");
+            let ipBar = "";
+            let sendBtn = "";
+
+            if(reply_row_id === undefined){
+                    ipBar = `${reply_id}${blog_id}inputBar`;
+                    sendBtn = `${reply_id}${blog_id}sendMainSub`;
+                }else{
+                    ipBar = `${reply_row_id}${blog_id}post_sub_input`;
+                    sendBtn = `${reply_row_id}${blog_id}post_sub_button`;
+                }
+            
+            document.getElementById(sendBtn).addEventListener
+            ("click",() => {
+                
+                let message = document.getElementById(ipBar).value;
+                if(!message.trim().length) return;
+                let obj = {
+                    to_id: from_id,
+                    blog_id,
+                    reply_id,
+                    message
+                };
+                console.log(obj.message);
+
+                fetch("/api/v1/auth/post-sub-comment",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify(obj)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if(res.message === `Your'e not logged in`){
+                        alert(`Your'e not logged in`);
+                    }
+                })
+                .catch(err => console.error(err))
+                .finally(()=>{
+                    openSubComments(blog_id,reply_id);
+                    if(document.getElementById(`${reply_id}${blog_id}inputBar`).value.length)
+                    document.getElementById(`${reply_id}${blog_id}inputBar`).value = "";
+                });
+            })
+        }
+
+
+        const postMainComment = (blog_id,comment_count) =>{
+            //{ blog_id, message }
+            
+            const message = document.getElementById(`${blog_id}inputMessage`).value;
+            if(!message.trim().length){
+                return;
+            }
+            fetch("/api/v1/auth/post-comment",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({ blog_id, message})
+            })
+            .then(res => res.json())
+            .then(res => {
+                if(res.message === `Your'e not logged in`){
+                    alert(`Your'e not logged in`);
+                    return;
+                }
+                //document.getElementById(`${blog_id}spanCount`).innerText = comment_count + 1;
+
+                
+                //comment_count++;
+                //if(document.getElementById(`${blog_id}openComments`).style.display === "block"){
+                //    document.getElementById(`${blog_id}openCommentBtn`).innerHTML
+                //= `Cancel <span class="badge badge-light" id="${blog_id}spanCount">${comment_count}</span>`;
+                //}
+            })
+            .catch(err => console.error(err))
+            .finally(()=>{
+                count = 0;
+                document.getElementById(`${blog_id}inputMessage`).value = "";
+                const toClear = document.getElementById(`${blog_id}messageContainer`);
+                toClear.innerHTML = "";
+                document.getElementById(`${blog_id}messagesDiv`).style.display = "block";
+                loadComments(blog_id,comment_count);
+                
+            });
+
+        }
+
+</script>
+</body>
+</html>

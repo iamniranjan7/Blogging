@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update profile</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        
+        .left-part {
+            background-color: #e9ecef; /* Light gray background for the left part */
+            padding: 20px;
+        }
+        .main-content {
+            background-color: #f8f9fa; /* Slightly lighter gray background for the main content */
+            padding: 20px;
+        }
+        .container {
+            padding-top: 20px; /* Add padding to the top of the container */
+            padding-bottom: 20px; /* Add padding to the bottom of the container */
+        }
+        .navbar {
+            margin-bottom: 20px; /* Add margin to the bottom of the navbar */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-3">
+                <div class="left-part">
+                    <!-- Left Part (25%) -->
+                    <h2>Profile</h2>
+                    <div class="card">
+                        <img src="" class="card-img-top" alt="..." id="imgsr">
+                        <div class="card-body">
+                            <h5 class="card-title" id="name">Card title</h5>
+                            <p class="card-text" id="bio">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {{!-- <li class="list-group-item" id="blogs"></li> --}}
+                            <li class="list-group-item" id="blogs" onclick="myPosts()" role="button">My posts</li>
+
+                            <li class="list-group-item"><a href="/update-profile" class="text-decoration-none text-body">Update profile</a></li>
+                            <li class="list-group-item"><a href="/manage-friends" class="text-decoration-none text-body">Friends</a></li>
+                        </ul>
+                        <div class="card-body" id="logins">
+                {{!-- <a href="/login" class="card-link">Login</a> --}}
+                {{!-- <a href="/main" class="card-link" onclick="logout()">logout</a> --}}
+              </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-9">
+                <div class="main-content">
+                    <!-- Main Content (75%) -->
+                    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                        <a class="navbar-brand" href="/main">MyBlogs</a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav mr-auto">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/create">Create</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/see-users">Add Friend</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/friends-blogs">Private Blog</a>
+                                </li>
+                                
+                            </ul>
+                            <form class="form-inline my-2 my-lg-0" id="searchForm"> 
+                                <input class="form-control mr-sm-2" type="search" placeholder="Search username" aria-label="Search" id="searched">
+                                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="search">Search</button>
+                            </form>
+                        </div>
+                    </nav>
+                    <h1>Update your profile</h1><br>
+                  
+                        <form id="myForm">
+                            <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Change Username</label>
+                                <input type="text" class="form-control" id="updateName" placeholder="Username here">
+                                </div>
+                                <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">New bio</label>
+                                <textarea class="form-control" rows="3" id="updateBio"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label">Profile image</label><br>
+                                <input type="file"  id="ppi"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                <label for="exampleFormControlTextarea1" class="form-label" >Background image</label><br>
+                                <input type="file" id="bgi"></textarea>
+                                </div>
+                                <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-outline-secondary">Update profile</button>
+                        </div>
+                        </form>
+                        <h4 id="msghre" style="display: none;">Loading...</h4>
+                        <h4 id="msg"></h4><hr>
+                        <div>
+                                                   <h5>Update password</h5><br>
+
+                            <form id="passwordForm">
+                            <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Current password</label>
+                                <input type="password" class="form-control" id="pwd" placeholder="Password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">New password</label>
+                                <input type="password" class="form-control" id="npwd" placeholder="Password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleFormControlInput1" class="form-label">Confirm new password</label>
+                                <input type="password" class="form-control" id="cnpwd" placeholder="Password">
+                            </div>
+                              <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-outline-secondary">Update password</button>
+                        </div>
+                        </form>
+                        <h4 id="mpsghre" style="display: none;">Loading...</h4>
+                        <h4 id="pmsg"></h4>
+
+
+
+                        </div>
+                         
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+     const logout = () => {
+        fetch("/api/v1/auth/signout");
+    }
+
+    const myPosts = () =>{
+        console.log("this are my posts");
+        window.location.href = `http://localhost:8000/my-posts`;
+    }
+
+    document.getElementById("searchForm").addEventListener("submit", e => {
+    
+        e.preventDefault();
+        let searched = document.getElementById("searched").value;
+        let url = `http://localhost:8000/search-user/${searched.trim()}`;
+
+        if(searched.trim().length){
+            window.open(url,'_blank');
+        }
+    });
+
+
+    document.getElementById("passwordForm").addEventListener("submit",e =>{
+        e.preventDefault();
+        document.getElementById("mpsghre").style.display = "block";
+        //pwd npwd cnpwd
+        const pwd = document.getElementById("pwd").value;
+        const npwd = document.getElementById("npwd").value;
+        const cnpwd = document.getElementById("cnpwd").value;
+        
+        
+        fetch("/user/updatePassword",{
+            method:"PATCH",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({ password:pwd, newPassword:npwd, confirmNewPassword:cnpwd })
+        })
+        .then(res => res.json())
+        .then(res =>{
+            document.getElementById("pmsg").innerText = res.message;
+        })
+        .catch(err => console.error(err))
+        .finally(() =>{
+            document.getElementById("mpsghre").style.display = "none";
+            document.getElementById("pwd").value = "";
+            document.getElementById("npwd").value = "";
+            document.getElementById("cnpwd").value = "";
+        })
+
+    })
+
+
+   const loadProfile = () =>{
+     fetch("/user/profile")
+    .then(res => res.json())
+    .then(res => {
+       // name,bio,imgsr
+       const profile = res.result.profile;
+       if(profile.email){
+         document.getElementById("logins").innerHTML = 
+         `<a href="/main" class="card-link" onclick="logout()">logout</a>`;
+       }else{
+        //document.getElementById("loginBtn").style.display = "inline-block";
+        document.getElementById("logins").innerHTML = 
+        `<a href="/login" class="card-link" id="loginBtn">Login</a>`;
+       }
+       //document.getElementById("blogs").innerText = `Blogs ${profile.blog_count}`;
+       document.getElementById("name").innerText = profile.username;
+       document.getElementById("bio").innerText = profile.bio;
+       const img = profile.profilePicture ? profile.profilePicture : "Public/img/users/default.jpg";
+       document.getElementById("imgsr").src = img;
+    })
+    .catch(err => console.error(err));
+   }
+
+
+    //ppi,bgi,updateBio,updateName
+    //{ username, profilePicture, backgroundPicture, bio, birthdate }
+
+    document.getElementById("myForm").addEventListener("submit",e=>{
+        document.getElementById("msghre").style.display = "block";
+        document.getElementById("msg").innerText = "";
+
+        e.preventDefault();
+        const ppi = document.getElementById("ppi").files[0];
+        const bgi = document.getElementById("bgi").files[0];
+        const name = document.getElementById("updateName").value;
+        const bio = document.getElementById("updateBio").value;
+        const formData = new FormData();
+        formData.append("username",name);
+        formData.append("bio",bio);
+
+        if(ppi){
+            formData.append("profilePicture",ppi);
+        }
+        if(bgi){
+            formData.append("backgroundPicture",bgi);
+        }
+
+        fetch("/user/updateProfile",{
+            method:"PATCH",
+            body:formData
+        })
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById("msg").innerText = res.message;
+        })
+        .catch(err => console.error(err))
+        .finally(()=>{
+            document.getElementById("msghre").style.display = "none";
+            document.getElementById("updateName").value = "";
+            document.getElementById("updateBio").value = "";
+            document.getElementById("ppi").value = "";
+            document.getElementById("bgi").value = "";
+            setTimeout(()=>{
+                document.getElementById("msg").innerText = "";
+            },2000);
+            loadProfile();
+
+        })
+
+        //console.log(name,bio);
+        
+        
+    })
+
+
+    
+
+/**/
+ 
+loadProfile();
+
+</script>
+</body>
+</html>
